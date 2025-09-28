@@ -1,3 +1,4 @@
+import type { DeepslateFS } from "./DeepslateFS";
 import type { SelectedUserData } from "./JWTUserData";
 
 export type DInitProps = {
@@ -8,6 +9,7 @@ export type DInitProps = {
   };
   server: {
     maxJSONSize: string | number;
+    fs: DeepslateFS;
   };
 };
 

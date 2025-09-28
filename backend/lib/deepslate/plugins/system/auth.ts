@@ -93,12 +93,10 @@ export class DeepslateAuth {
         const result = await this.signup(req, { username, nickname, password });
 
         if (result === AuthError.ALREADY_EXISTS) {
-          return res
-            .status(409)
-            .json({
-              success: false,
-              error: "Username or nickname already exists",
-            });
+          return res.status(409).json({
+            success: false,
+            error: "Username or nickname already exists",
+          });
         }
 
         res.json({ success: true });
@@ -163,6 +161,56 @@ export class DeepslateAuth {
         res.json({ success: true });
       } catch (error) {
         console.error("Delete user error:", error);
+        res
+          .status(500)
+          .json({ success: false, error: "Internal server error" });
+      }
+    });
+
+    // POST /deepslate/auth/profile/upload
+    r.post("/profile/upload", async (req, res) => {
+      try {
+        const user = this.getUserFromSession(req);
+
+        if (!user) {
+          return res
+            .status(401)
+            .json({ success: false, error: "Not logged in" });
+        }
+
+        // Check if request has file data
+        if (!req.body || req.body.length === 0) {
+          return res
+            .status(400)
+            .json({ success: false, error: "No file data provided" });
+        }
+
+        // Create public/profileImage directory if it doesn't exist
+        const publicDir = this.deepslate.props.server.fs.resolvePath("/public");
+        const profileImageDir = this.deepslate.props.server.fs.resolvePath(
+          "/public/profileImage"
+        );
+
+        await this.deepslate.props.server.fs.mkdir(publicDir);
+        await this.deepslate.props.server.fs.mkdir(profileImageDir);
+
+        // Save the file
+        const filePath = `/public/profileImage/${user.id}.webp`;
+        const buffer = Buffer.isBuffer(req.body)
+          ? req.body
+          : Buffer.from(req.body);
+        await this.deepslate.props.server.fs.write(filePath, buffer);
+
+        // Update user's profile image URL in database
+        const profileImageUrl = `/deepslate/public/profileImage/${user.id}.webp`;
+        await this.updateProfileImage(req, profileImageUrl);
+
+        res.json({
+          success: true,
+          profileImage: profileImageUrl,
+        });
+      } catch (error) {
+        console.error("Profile upload error:", error);
         res
           .status(500)
           .json({ success: false, error: "Internal server error" });

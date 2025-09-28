@@ -7,5 +7,5 @@ export interface DeepslatePlugin {
   author?: string;
   description?: string;
 
-  init: (deepslate: Deepslate) => any;
+  init: (deepslate: Deepslate) => void | Promise<void>;
 }

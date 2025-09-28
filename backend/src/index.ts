@@ -1,8 +1,10 @@
-import { Deepslate } from "#";
+import { Deepslate, DeepslateFS_Local } from "#";
 
 const app = new Deepslate({
   port: 3000,
-  user: {},
+  server: {
+    fs: new DeepslateFS_Local("./data"),
+  },
 });
 
-app.start();
+await app.start();

@@ -21,7 +21,7 @@ export default class Deepslate {
     this.props = mergeProps(DInitProps_default, props);
   }
 
-  public start(port: number = this.props.port) {
+  public async start(port: number = this.props.port) {
     logger.info(`Starting Deepslate (${chalk.bold.gray(getVersion())})...`);
 
     if (
@@ -38,7 +38,7 @@ export default class Deepslate {
           plugin.version
         )})`
       );
-      plugin.init(this);
+      await plugin.init(this);
     }
     logger.success(`Has ${chalk.yellow(this.plugins.length)} plugins loaded.`);
 
@@ -54,3 +54,7 @@ export default class Deepslate {
     this.plugins.push(plugin);
   }
 }
+
+export * from "./types";
+export * from "./components";
+export * from "./static";

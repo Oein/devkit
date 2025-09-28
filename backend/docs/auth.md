@@ -213,3 +213,48 @@ Signout and delete the current user.
   "error": "Internal server error"
 }
 ```
+
+### POST /deepslate/auth/profile/upload
+
+Upload a profile image for the current user.
+
+- Request Body: WebP image file as binary data
+- Content-Type: Should be set appropriately for binary data
+
+- Response:
+
+**Success (200)**:
+
+```json
+{
+  "success": true,
+  "profileImage": "/deepslate/public/profileImage/{userid}.webp"
+}
+```
+
+**Not Logged In (401)**:
+
+```json
+{
+  "success": false,
+  "error": "Not logged in"
+}
+```
+
+**No File Data (400)**:
+
+```json
+{
+  "success": false,
+  "error": "No file data provided"
+}
+```
+
+**Server Error (500)**:
+
+```json
+{
+  "success": false,
+  "error": "Internal server error"
+}
+```

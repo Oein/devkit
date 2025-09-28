@@ -14,6 +14,7 @@ import { DeepslateAuth } from "./auth";
  * @version 0.0.1-dev
  * @author <Oein me@oein.kr>
  * @description Initializes json, session, and authentication.
+ * @documentation https://github.com/Oein/devkit/tree/main/backend/docs/system-plugin.md
  */
 export default class DeepslateSystem implements DeepslatePlugin {
   name = "Bedrock";
@@ -24,7 +25,7 @@ export default class DeepslateSystem implements DeepslatePlugin {
 
   auth!: DeepslateAuth;
 
-  init(deepslate: Deepslate) {
+  async init(deepslate: Deepslate) {
     deepslate.server.use(
       express.json({
         limit: deepslate.props.server.maxJSONSize,
@@ -48,6 +49,11 @@ export default class DeepslateSystem implements DeepslatePlugin {
         cookie: { secure: true },
       })
     );
+
+    // Initialize public data access
+    const publicData = deepslate.props.server.fs.resolvePath("/public");
+    await deepslate.props.server.fs.mkdir(publicData);
+    deepslate.server.use("/deepslate/public", express.static(publicData));
 
     this.auth = new DeepslateAuth(deepslate);
   }
