@@ -3,27 +3,41 @@ import chalk from "chalk";
 
 import logger from "l#";
 
-import type { DeepslatePlugin, DInitProps, DInitPropsOptional } from "d#/types";
+import type {
+  DeepslateFS,
+  DeepslatePlugin,
+  DInitProps,
+  DInitPropsOptional,
+} from "d#/types";
 import { DInitProps_default } from "d#/static";
 import { mergeProps, getVersion } from "#/utils";
 import DeepslateSystem from "./plugins/system";
 import { DeepslateAuth } from "./plugins/system/auth";
+import DeepslateKVDB from "./plugins/database/kv";
 
 export default class Deepslate {
-  private systemPlugin: DeepslateSystem;
-  private plugins: DeepslatePlugin[];
+  private systemPlugin!: DeepslateSystem;
+  private plugins!: DeepslatePlugin[];
 
   public server: express.Express;
   public props: DInitProps;
-  public auth: DeepslateAuth;
+  public auth!: DeepslateAuth;
+  public kv!: DeepslateKVDB;
+  public fs!: DeepslateFS;
 
-  public constructor(props: DInitPropsOptional) {
-    this.server = express();
-    this.props = mergeProps(DInitProps_default, props);
+  private setupSystemPlugin() {
+    this.kv = new DeepslateKVDB();
+    this.fs = this.props.server.fs;
 
     this.auth = new DeepslateAuth(this);
     this.systemPlugin = new DeepslateSystem(this.auth);
     this.plugins = [this.systemPlugin];
+  }
+
+  public constructor(props: DInitPropsOptional) {
+    this.server = express();
+    this.props = mergeProps(DInitProps_default, props);
+    this.setupSystemPlugin();
   }
 
   public async start(port: number = this.props.port) {

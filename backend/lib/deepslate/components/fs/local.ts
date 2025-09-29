@@ -3,6 +3,11 @@ import fsSync from "fs";
 import path from "path";
 import type { DeepslateFS } from "d#/types";
 
+/**
+ * @version 1.0.0
+ * @author <Oein me@oein.kr>
+ * @description Local filesystem storage plugin for Deepslate.
+ */
 export class DeepslateFS_Local implements DeepslateFS {
   private basePath: string;
 

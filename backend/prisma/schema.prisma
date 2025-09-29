@@ -24,3 +24,8 @@ model Account {
   userData     String   @default("{}")
   profileImage String?
 }
+
+model KV {
+  key   String @id() @unique
+  value String
+}
