@@ -23,7 +23,7 @@ export default class DeepslateSystem implements DeepslatePlugin {
   description =
     "Core system plugin for Deepslate\nInitializes json, session, and authentication.";
 
-  auth!: DeepslateAuth;
+  constructor(public auth: DeepslateAuth) {}
 
   async init(deepslate: Deepslate) {
     deepslate.server.use(
@@ -54,7 +54,5 @@ export default class DeepslateSystem implements DeepslatePlugin {
     const publicData = deepslate.props.server.fs.resolvePath("/public");
     await deepslate.props.server.fs.mkdir(publicData);
     deepslate.server.use("/deepslate/public", express.static(publicData));
-
-    this.auth = new DeepslateAuth(deepslate);
   }
 }

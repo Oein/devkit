@@ -7,18 +7,23 @@ import type { DeepslatePlugin, DInitProps, DInitPropsOptional } from "d#/types";
 import { DInitProps_default } from "d#/static";
 import { mergeProps, getVersion } from "#/utils";
 import DeepslateSystem from "./plugins/system";
+import { DeepslateAuth } from "./plugins/system/auth";
 
 export default class Deepslate {
-  private systemPlugin = new DeepslateSystem();
-  private plugins: DeepslatePlugin[] = [this.systemPlugin];
+  private systemPlugin: DeepslateSystem;
+  private plugins: DeepslatePlugin[];
 
   public server: express.Express;
   public props: DInitProps;
-  public auth = this.systemPlugin.auth;
+  public auth: DeepslateAuth;
 
   public constructor(props: DInitPropsOptional) {
     this.server = express();
     this.props = mergeProps(DInitProps_default, props);
+
+    this.auth = new DeepslateAuth(this);
+    this.systemPlugin = new DeepslateSystem(this.auth);
+    this.plugins = [this.systemPlugin];
   }
 
   public async start(port: number = this.props.port) {

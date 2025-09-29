@@ -12,6 +12,16 @@ export enum AuthError {
   ALREADY_EXISTS,
 }
 
+export type AuthRequestResponse<E, D = null> =
+  | {
+      success: false;
+      data: E;
+    }
+  | {
+      success: true;
+      data: D;
+    };
+
 /**
 # Deepslate Authentication System
 
@@ -39,13 +49,16 @@ export class DeepslateAuth {
 
         const result = await this.signin(req, username, password);
 
-        if (result === AuthError.NO_ACCOUNT) {
+        if (result.success === false && result.data === AuthError.NO_ACCOUNT) {
           return res
             .status(404)
             .json({ success: false, error: "Account not found" });
         }
 
-        if (result === AuthError.WRONG_PASSWORD) {
+        if (
+          result.success === false &&
+          result.data === AuthError.WRONG_PASSWORD
+        ) {
           return res
             .status(401)
             .json({ success: false, error: "Invalid password" });
@@ -241,15 +254,24 @@ export class DeepslateAuth {
   }
 
   // MARK: - Authentication
-  async signin(req: express.Request, username: string, password: string) {
+  async signin(
+    req: express.Request,
+    username: string,
+    password: string
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NO_ACCOUNT | AuthError.WRONG_PASSWORD,
+      SessionUserData
+    >
+  > {
     const acc = await prisma.account.findUnique({
       where: {
         username,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const isValid = Bun.password.verify(password, acc.password);
-    if (!isValid) return AuthError.WRONG_PASSWORD;
+    if (!isValid) return { success: false, data: AuthError.WRONG_PASSWORD };
     const {
       password: _,
       profileImage: __,
@@ -258,7 +280,7 @@ export class DeepslateAuth {
       ...user
     } = acc;
     req.session!.user = user;
-    return user;
+    return { success: true, data: user };
   }
 
   async signout(req: express.Request) {
@@ -322,8 +344,14 @@ export class DeepslateAuth {
     req: express.Request,
     newData: Record<string, any>,
     replace = false
-  ) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT,
+      Record<string, any>
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
@@ -332,7 +360,7 @@ export class DeepslateAuth {
         userData: true,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const currentData = acc.userData ? JSON.parse(acc.userData) : {};
     const mergedData = replace ? newData : { ...currentData, ...newData };
     await prisma.account.update({
@@ -343,11 +371,19 @@ export class DeepslateAuth {
         userData: JSON.stringify(mergedData),
       },
     });
-    return mergedData;
+    return { success: true, data: mergedData };
   }
 
-  async getUserData(req: express.Request) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async getUserData(
+    req: express.Request
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT,
+      Record<string, any>
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
@@ -356,19 +392,31 @@ export class DeepslateAuth {
         userData: true,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
-    return acc.userData ? JSON.parse(acc.userData) : {};
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
+    return {
+      success: true,
+      data: acc.userData ? JSON.parse(acc.userData) : {},
+    };
   }
 
   // MARK: - Personal information management
-  async updateNickname(req: express.Request, nickname: string) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async updateNickname(
+    req: express.Request,
+    nickname: string
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.ALREADY_EXISTS,
+      SessionUserData
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const existing = await prisma.account.findUnique({
       where: {
         nickname,
       },
     });
-    if (existing) return AuthError.ALREADY_EXISTS;
+    if (existing) return { success: false, data: AuthError.ALREADY_EXISTS };
     const acc = await prisma.account.update({
       where: {
         id: req.session.user.id,
@@ -385,11 +433,18 @@ export class DeepslateAuth {
       ...user
     } = acc;
     req.session!.user = user;
-    return user as SessionUserData;
+    return {
+      success: true,
+      data: user as SessionUserData,
+    };
   }
 
-  async updateProfileImage(req: express.Request, imageUrl: string) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async updateProfileImage(
+    req: express.Request,
+    imageUrl: string
+  ): Promise<AuthRequestResponse<AuthError.NOT_LOGGED_IN, SessionUserData>> {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.update({
       where: {
         id: req.session.user.id,
@@ -406,20 +461,33 @@ export class DeepslateAuth {
       ...user
     } = acc;
     req.session!.user = user;
-    return user as SessionUserData;
+    return {
+      success: true,
+      data: user as SessionUserData,
+    };
   }
 
   // MARK: - Password management
-  async updatePassword(req: express.Request, current: string, newP: string) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async updatePassword(
+    req: express.Request,
+    current: string,
+    newP: string
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT | AuthError.WRONG_PASSWORD,
+      null
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const isValid = Bun.password.verify(current, acc.password);
-    if (!isValid) return AuthError.WRONG_PASSWORD;
+    if (!isValid) return { success: false, data: AuthError.WRONG_PASSWORD };
     const hashedPassword = await Bun.password.hash(newP);
     await prisma.account.update({
       where: {
@@ -429,17 +497,23 @@ export class DeepslateAuth {
         password: hashedPassword,
       },
     });
-    return true;
+    return { success: true, data: null };
   }
 
-  async setPassword(req: express.Request, newP: string) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async setPassword(
+    req: express.Request,
+    newP: string
+  ): Promise<
+    AuthRequestResponse<AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT, null>
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const hashedPassword = await Bun.password.hash(newP);
     await prisma.account.update({
       where: {
@@ -449,19 +523,28 @@ export class DeepslateAuth {
         password: hashedPassword,
       },
     });
-    return true;
+    return { success: true, data: null };
   }
 
   // MARK: - Flag management
-  async addFlags(req: express.Request, flags: number | number[]) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async addFlags(
+    req: express.Request,
+    flags: number | number[]
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT,
+      SessionUserData
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const addFlags = Array.isArray(flags) ? flags : [flags];
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const newFlags = addFlags.reduce((a, b) => a | b, acc.flags);
     const updated = await prisma.account.update({
       where: {
@@ -479,18 +562,30 @@ export class DeepslateAuth {
       ...user
     } = updated;
     req.session!.user = user;
-    return user as SessionUserData;
+    return {
+      success: true,
+      data: user as SessionUserData,
+    };
   }
 
-  async removeFlags(req: express.Request, flags: number | number[]) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async removeFlags(
+    req: express.Request,
+    flags: number | number[]
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT,
+      SessionUserData
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const removeFlags = Array.isArray(flags) ? flags : [flags];
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const newFlags = removeFlags.reduce((a, b) => a & ~b, acc.flags);
     const updated = await prisma.account.update({
       where: {
@@ -508,17 +603,29 @@ export class DeepslateAuth {
       ...user
     } = updated;
     req.session!.user = user;
-    return user as SessionUserData;
+    return {
+      success: true,
+      data: user as SessionUserData,
+    };
   }
 
-  async setFlags(req: express.Request, flags: number) {
-    if (!req.session?.user) return AuthError.NOT_LOGGED_IN;
+  async setFlags(
+    req: express.Request,
+    flags: number
+  ): Promise<
+    AuthRequestResponse<
+      AuthError.NOT_LOGGED_IN | AuthError.NO_ACCOUNT,
+      SessionUserData
+    >
+  > {
+    if (!req.session?.user)
+      return { success: false, data: AuthError.NOT_LOGGED_IN };
     const acc = await prisma.account.findUnique({
       where: {
         id: req.session.user.id,
       },
     });
-    if (!acc) return AuthError.NO_ACCOUNT;
+    if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
     const updated = await prisma.account.update({
       where: {
         id: req.session.user.id,
@@ -535,6 +642,9 @@ export class DeepslateAuth {
       ...user
     } = updated;
     req.session!.user = user;
-    return user as SessionUserData;
+    return {
+      success: true,
+      data: user as SessionUserData,
+    };
   }
 }

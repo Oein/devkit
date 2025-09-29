@@ -13,8 +13,12 @@ class HelloWorld implements DeepslatePlugin {
   name = "HelloWorld";
   version = "1.0.0";
   init(deepslate: Deepslate) {
-    deepslate.server.get("/", (req, res) => {
-      res.send("Hello, World!");
+    deepslate.server.get("/", async (req, res) => {
+      const userData = await deepslate.auth.getUserData(req);
+      res.send({
+        text: "Hello, World!",
+        user: userData ?? "Guest",
+      });
     });
   }
 }
