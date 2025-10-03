@@ -1,6 +1,9 @@
-import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+
+import { ContinuelProvider } from "@/lib";
+
+import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -12,7 +15,9 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="description" content="Refine - A Next.js based framework" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Component {...pageProps} />
+      <ContinuelProvider>
+        <Component {...pageProps} />
+      </ContinuelProvider>
     </>
   );
 }
