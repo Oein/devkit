@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "continuel": "../continuel",
+    "@toss/use-overlay": "^1.4.2",
     "continuel": "../continuel",
     "next": "15.5.4",
     "react": "19.1.0",

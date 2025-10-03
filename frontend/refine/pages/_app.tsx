@@ -4,6 +4,7 @@ import Head from "next/head";
 import { ContinuelProvider } from "@/lib";
 
 import "@/styles/globals.css";
+import { OverlayProvider } from "@toss/use-overlay";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -16,7 +17,9 @@ export default function App({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ContinuelProvider>
-        <Component {...pageProps} />
+        <OverlayProvider>
+          <Component {...pageProps} />
+        </OverlayProvider>
       </ContinuelProvider>
     </>
   );
