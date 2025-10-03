@@ -19,6 +19,7 @@ await build({
   sourcemap: "external",
   external: [
     // Add any external dependencies here that shouldn't be bundled
+    "axios",
   ],
 });
 
