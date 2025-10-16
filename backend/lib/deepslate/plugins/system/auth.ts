@@ -42,7 +42,10 @@ export class DeepslateAuth {
         if (!username || !password) {
           return res
             .status(400)
-            .json({ success: false, error: "Missing username or password" });
+            .json({
+              success: false,
+              error: ERROR_MESSAGES.MISSING_USERNAME_PASSWORD,
+            });
         }
 
         const result = await this.signin(req, username, password);
@@ -50,7 +53,7 @@ export class DeepslateAuth {
         if (result.success === false && result.data === AuthError.NO_ACCOUNT) {
           return res
             .status(404)
-            .json({ success: false, error: "Account not found" });
+            .json({ success: false, error: ERROR_MESSAGES.ACCOUNT_NOT_FOUND });
         }
 
         if (
@@ -59,7 +62,7 @@ export class DeepslateAuth {
         ) {
           return res
             .status(401)
-            .json({ success: false, error: "Invalid password" });
+            .json({ success: false, error: ERROR_MESSAGES.INVALID_PASSWORD });
         }
 
         res.json({ success: true });
@@ -67,7 +70,10 @@ export class DeepslateAuth {
         console.error("Signin error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -77,7 +83,7 @@ export class DeepslateAuth {
         if (!req.session?.user) {
           return res
             .status(401)
-            .json({ success: false, error: "Not logged in" });
+            .json({ success: false, error: ERROR_MESSAGES.NOT_LOGGED_IN });
         }
 
         await this.signout(req);
@@ -86,7 +92,10 @@ export class DeepslateAuth {
         console.error("Signout error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -98,7 +107,10 @@ export class DeepslateAuth {
         if (!username || !nickname || !password) {
           return res
             .status(400)
-            .json({ success: false, error: "Missing required fields" });
+            .json({
+              success: false,
+              error: ERROR_MESSAGES.MISSING_REQUIRED_FIELDS,
+            });
         }
 
         const result = await this.signup(req, { username, nickname, password });
@@ -106,7 +118,7 @@ export class DeepslateAuth {
         if (result === AuthError.ALREADY_EXISTS) {
           return res.status(409).json({
             success: false,
-            error: "Username already exists",
+            error: ERROR_MESSAGES.USERNAME_ALREADY_EXISTS,
           });
         }
 
@@ -115,7 +127,10 @@ export class DeepslateAuth {
         console.error("Signup error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -146,7 +161,10 @@ export class DeepslateAuth {
         console.error("Get user error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -158,7 +176,7 @@ export class DeepslateAuth {
         if (!user) {
           return res
             .status(401)
-            .json({ success: false, error: "Not logged in" });
+            .json({ success: false, error: ERROR_MESSAGES.NOT_LOGGED_IN });
         }
 
         // Delete the user account
@@ -174,7 +192,10 @@ export class DeepslateAuth {
         console.error("Delete user error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -186,14 +207,13 @@ export class DeepslateAuth {
         if (!user) {
           return res
             .status(401)
-            .json({ success: false, error: "Not logged in" });
+            .json({ success: false, error: ERROR_MESSAGES.NOT_LOGGED_IN });
         }
 
-        // Check if request has file data
         if (!req.body || req.body.length === 0) {
           return res
             .status(400)
-            .json({ success: false, error: "No file data provided" });
+            .json({ success: false, error: ERROR_MESSAGES.NO_FILE_DATA });
         }
 
         // Create public/profileImage directory if it doesn't exist
@@ -224,7 +244,10 @@ export class DeepslateAuth {
         console.error("Profile upload error:", error);
         res
           .status(500)
-          .json({ success: false, error: "Internal server error" });
+          .json({
+            success: false,
+            error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          });
       }
     });
 
@@ -640,3 +663,17 @@ export class DeepslateAuth {
     };
   }
 }
+
+// Updated error messages to be in Korean
+const ERROR_MESSAGES = {
+  MISSING_USERNAME_PASSWORD: "사용자 이름 또는 비밀번호가 누락되었습니다.",
+  ACCOUNT_NOT_FOUND: "계정을 찾을 수 없습니다.",
+  INVALID_PASSWORD: "비밀번호가 올바르지 않습니다.",
+  INTERNAL_SERVER_ERROR: "내부 서버 오류가 발생했습니다.",
+  NOT_LOGGED_IN: "로그인되어 있지 않습니다.",
+  MISSING_REQUIRED_FIELDS: "필수 입력란이 누락되었습니다.",
+  USERNAME_ALREADY_EXISTS: "사용자 이름이 이미 존재합니다.",
+  UNAUTHORIZED: "권한이 없습니다.",
+  FORBIDDEN: "접근이 금지되었습니다.",
+  NO_FILE_DATA: "파일 데이터가 제공되지 않았습니다.",
+};

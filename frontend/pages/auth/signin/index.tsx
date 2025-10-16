@@ -36,45 +36,45 @@ function SignIn() {
         if (loading) return;
 
         if (!id) {
-          toast.error("You must provide your ID");
+          toast.error("아이디를 입력해주세요");
           return;
         }
         if (!password) {
-          toast.error("You must provide your password");
+          toast.error("비밀번호를 입력해주세요");
           return;
         }
         setLoading(true);
         auth.signin({ username: id, password }).then((res) => {
           setLoading(false);
           if (res.success) {
-            toast.success("Signed in successfully");
+            toast.success("로그인에 성공했습니다");
             router.push(redirect);
           } else {
-            toast.error(res.error || "Failed to sign up");
+            toast.error(res.error || "로그인에 실패했습니다");
           }
         });
       }}
     >
       <FieldSet>
-        <FieldLegend>Sign In</FieldLegend>
-        <FieldDescription>Log in to your account</FieldDescription>
+        <FieldLegend>로그인</FieldLegend>
+        <FieldDescription>계정에 로그인하세요</FieldDescription>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="id">ID</FieldLabel>
+            <FieldLabel htmlFor="id">아이디</FieldLabel>
             <Input
               id="id"
               type="text"
-              placeholder="ID"
+              placeholder="아이디"
               value={id}
               onChange={(e) => setId(e.currentTarget.value)}
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel htmlFor="password">비밀번호</FieldLabel>
             <Input
               id="password"
               type="password"
-              placeholder="Password"
+              placeholder="비밀번호"
               value={password}
               onChange={(e) => setPassword(e.currentTarget.value)}
             />
@@ -82,19 +82,19 @@ function SignIn() {
         </FieldGroup>
 
         <FieldDescription>
-          Don't have an account?{" "}
+          계정이 없으신가요?{" "}
           <a
             href={`/auth/signup?redirect=${encodeURIComponent(redirect)}`}
             className="text-blue-400 hover:underline"
           >
-            Sign up here
+            여기에서 가입하세요
           </a>
         </FieldDescription>
 
         <Field orientation="horizontal" className="justify-end">
           <Button type="submit" disabled={loading}>
             {loading ? <Spinner /> : null}
-            Sign in
+            로그인
             <ArrowRight />
           </Button>
         </Field>

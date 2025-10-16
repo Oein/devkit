@@ -14,25 +14,25 @@ function SignOut() {
   useEffect(() => {
     auth.signout().then((res) => {
       if (res.success) {
-        toast.success("Signed out successfully");
+        toast.success("성공적으로 로그아웃되었습니다");
         router.push(redirect);
       } else {
-        if (res.error.toLocaleLowerCase().includes("not logged in")) {
-          toast.success("You are already signed out");
+        if (res.error == "로그인되어 있지 않습니다.") {
+          toast.success("이미 로그아웃된 상태입니다");
           router.push(redirect);
           return;
         }
-        toast.error(res.error || "Failed to sign out");
+        toast.error(res.error || "로그아웃에 실패했습니다");
       }
     });
   }, [redirect]);
 
   return (
     <>
-      <h1 className="text-3xl pb-4">Signing Out</h1>
+      <h1 className="text-3xl pb-4">로그아웃 중</h1>
       <div className="flex items-center gap-2">
         <Spinner />
-        <div>Give us a moment, signing you out...</div>
+        <div>잠시만 기다려 주세요, 로그아웃 처리 중입니다...</div>
       </div>
     </>
   );
