@@ -131,7 +131,7 @@ export class DeepslateAuth {
         // Get additional user data including profileImage
         const account = await prisma.account.findUnique({
           where: { id: user.id },
-          select: { profileImage: true },
+          select: { profileImage: true, nickname: true, username: true },
         });
 
         res.json({

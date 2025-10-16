@@ -1,12 +1,7 @@
 // Hooks
-export {
-  useContinuel,
-  useContinuelContext,
-  ContinuelContext,
-} from "./hooks/useContinuel";
+export { useContinuel, ContinuelContext } from "./hooks/useContinuel";
+export { useAuth, AuthContext } from "./hooks/useAuth";
 
 // Providers
 export { ContinuelProvider } from "./providers/ContinuelProvider";
-
-// Note: Import types directly from 'continuel' package when needed
-// Example: import type { AuthResponse, UserData } from 'continuel';
+export { AuthProvider } from "./providers/AuthProvider";
