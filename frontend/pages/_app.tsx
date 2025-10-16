@@ -9,6 +9,7 @@ import { OverlayProvider } from "@toss/use-overlay";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import AuthProvider from "@/lib/providers/AuthProvider";
+import Tabs from "@/components/oein/Tabs";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -30,6 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <AuthProvider>
             <OverlayProvider>
               <Component {...pageProps} />
+              <Tabs />
               <Toaster position="bottom-right" duration={3000} />
             </OverlayProvider>
           </AuthProvider>

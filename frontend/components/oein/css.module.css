@@ -1,0 +1,31 @@
+.tabs {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  border-radius: 8px 8px 0 0;
+  padding: 4px;
+
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tab {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  border-radius: 4px;
+  color: var(--color-gray-400);
+  cursor: pointer;
+}
+
+.tab.active {
+  background-color: color-mix(in oklab, var(--color-blue-500) 20%, transparent);
+  font-weight: 600;
+  color: var(--foreground);
+}
