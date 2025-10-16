@@ -54,5 +54,7 @@ export default class DeepslateSystem implements DeepslatePlugin {
     const publicData = deepslate.props.server.fs.resolvePath("/public");
     await deepslate.props.server.fs.mkdir(publicData);
     deepslate.server.use("/deepslate/public", express.static(publicData));
+
+    this.auth.init();
   }
 }

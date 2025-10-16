@@ -1,5 +1,5 @@
 import { DarkModeToggle } from "@/components/ui/darkmode-toggle";
-import { Button } from "@/ui/button";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function Home() {

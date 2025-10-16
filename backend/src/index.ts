@@ -1,7 +1,7 @@
 import { Deepslate, DeepslateFS_Local, type DeepslatePlugin } from "#";
 
 const app = new Deepslate({
-  port: 3000,
+  port: 4000,
   server: {
     fs: new DeepslateFS_Local("./data"),
   },
@@ -25,4 +25,4 @@ class HelloWorld implements DeepslatePlugin {
 
 app.use(new HelloWorld());
 
-await app.start();
+app.start();

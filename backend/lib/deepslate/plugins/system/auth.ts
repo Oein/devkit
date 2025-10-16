@@ -30,10 +30,8 @@ This module provides a comprehensive authentication system for Deepslate, includ
 @documentation https://github.com/Oein/devkit/tree/main/backend/docs/auth.md
 */
 export class DeepslateAuth {
-  constructor(public deepslate: Deepslate) {
-    this.init();
-  }
-  private init() {
+  constructor(public deepslate: Deepslate) {}
+  public init() {
     const r = express.Router();
 
     // POST /deepslate/auth/signin
@@ -108,7 +106,7 @@ export class DeepslateAuth {
         if (result === AuthError.ALREADY_EXISTS) {
           return res.status(409).json({
             success: false,
-            error: "Username or nickname already exists",
+            error: "Username already exists",
           });
         }
 
@@ -270,7 +268,7 @@ export class DeepslateAuth {
       },
     });
     if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
-    const isValid = Bun.password.verify(password, acc.password);
+    const isValid = await Bun.password.verify(password, acc.password);
     if (!isValid) return { success: false, data: AuthError.WRONG_PASSWORD };
     const {
       password: _,
@@ -303,7 +301,7 @@ export class DeepslateAuth {
   ) {
     const existing = await prisma.account.findFirst({
       where: {
-        OR: [{ username: props.username }, { nickname: props.nickname }],
+        OR: [{ username: props.username }],
       },
     });
     if (existing) return AuthError.ALREADY_EXISTS;
@@ -411,12 +409,6 @@ export class DeepslateAuth {
   > {
     if (!req.session?.user)
       return { success: false, data: AuthError.NOT_LOGGED_IN };
-    const existing = await prisma.account.findUnique({
-      where: {
-        nickname,
-      },
-    });
-    if (existing) return { success: false, data: AuthError.ALREADY_EXISTS };
     const acc = await prisma.account.update({
       where: {
         id: req.session.user.id,
@@ -486,7 +478,7 @@ export class DeepslateAuth {
       },
     });
     if (!acc) return { success: false, data: AuthError.NO_ACCOUNT };
-    const isValid = Bun.password.verify(current, acc.password);
+    const isValid = await Bun.password.verify(current, acc.password);
     if (!isValid) return { success: false, data: AuthError.WRONG_PASSWORD };
     const hashedPassword = await Bun.password.hash(newP);
     await prisma.account.update({

@@ -1,0 +1,12 @@
+.wrp {
+  min-height: 100dvh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  max-width: min(400px, 95dvw);
+  width: 100%;
+}

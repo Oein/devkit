@@ -18,7 +18,7 @@ model Account {
   id           String   @id() @unique @default(cuid())
   createdAt    DateTime @default(now())
   username     String   @unique
-  nickname     String   @unique
+  nickname     String
   password     String
   flags        Int      @default(1)
   userData     String   @default("{}")

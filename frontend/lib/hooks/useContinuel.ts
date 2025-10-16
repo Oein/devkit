@@ -19,12 +19,4 @@ export function useContinuel(): Continuel {
   return continuel;
 }
 
-/**
- * @deprecated Use useContinuel instead - they now have the same behavior
- */
-export function useContinuelContext(): Continuel {
-  return useContinuel();
-}
-
-// Default export for convenience
 export default useContinuel;
